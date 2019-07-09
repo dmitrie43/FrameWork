@@ -2,6 +2,8 @@
 
 namespace application\core;
 
+use application\core\View;
+
 class Router
 {
     protected $routes = [];
@@ -32,14 +34,20 @@ class Router
 
     public function run() {
         if ($this->match()) {
-            $controller = 'application\controllers\\'.ucfirst($this->params['controller']).'Controller.php';
-            if (class_exists($controller)) {
-                echo 'Ok';
+            $path = 'application\controllers\\'.ucfirst($this->params['controller']).'Controller';
+            if (class_exists($path)) {
+                $action = $this->params['action'].'Action';
+                if (method_exists($path, $action)) {
+                    $controller = new $path($this->params);
+                    $controller->$action();
+                } else {
+                    View::errorCode(404);
+                }
             } else {
-                echo 'Класс '.$controller.' не найден';
+                View::errorCode(404);
             }
         } else {
-            echo 'Маршрут не найден';
+            View::errorCode(404 );
         }
     }
 
